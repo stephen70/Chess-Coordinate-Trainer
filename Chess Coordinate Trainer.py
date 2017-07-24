@@ -1,46 +1,78 @@
 from Tkinter import *
-import tkFont
+import tkFont 
+
 import random
+
 import os 
 from pathlib import Path
 
-lbFileStr = ("%s\Data" %os.getcwd())
+#find leaderboard file path
+lbFileStr = ("%s\Data" %os.getcwd()) 
 lbFilePath = Path(lbFileStr)
-
-iconsStr = ("%s\Icons" %os.getcwd())
 
 if not os.path.exists(lbFileStr):
 	os.makedirs(lbFileStr)
 
-lbValues = []
+#find icon path
+iconsStr = ("%s\Icons" %os.getcwd())
 
-if Path(lbFileStr + "\data.txt").is_file():
+#initialise various variables used
+lbValues = []
+recordcolour = 0
+showCoords = 0
+colour = 1
+time = 30.0
+total = 0
+score = 0
+chosensquare = 0
+begun = 0
+k = 0
+sessionbest10 = 0
+sessionbest30 = 0
+sessionbest60 = 0
+newrecordtimer = 0
+gameOver = 1
+nextColour = ""
+stopTimer = 0
+
+#read leaderboard file
+if Path(lbFileStr + "\data.txt").is_file(): #if 
 	lbFile = open(os.path.join(lbFileStr, "data.txt"), 'r')
 	with open(os.path.join(lbFileStr, "data.txt"), 'r') as f:
 		lbValues = f.read().splitlines()
 		lbValues[0] = eval(lbValues[0])
 		lbValues[1] = eval(lbValues[1])
 		lbValues[2] = eval(lbValues[2])
-else:
+
+#create leaderboard file if it doesn't already exist
+else: 
 	lbFile = open(lbFileStr + "\data.txt", 'w+')
 	for i in range(3):
 		lbValues.append(0)
 	lbFile.write('0\n0\n0')
 
+#initialise a parent window called top
 top = Tk()
+
+screenWidth = top.winfo_screenwidth()
+screenHeight = top.winfo_screenheight()
+
 top.configure(bg = "gray80")
 top.wm_title("Chess Coordinate Trainer")
 top.resizable(width=FALSE, height=FALSE)
 top.wm_iconbitmap(iconsStr, "\CCT.ico")
 
+#centre top window
+top.geometry("%dx%d+%d+%d" % ((755, 848) + ((screenWidth / 2.0) - 378, (screenHeight / 2.0) - 424)))
 
+#define fonts
 helv8 = tkFont.Font(family='Helvetica', size=8)
 helv50 = tkFont.Font(family='Helvetica', size=50)
 bottomLabelFont10 = tkFont.Font(family='Helvetica', size=10)
 
-squares = ["A1","A2","A3","A4","A5","A6","A7","A8","B1","B2","B3","B4","B5","B6","B7","B8","C1","C2","C3","C4","C5","C6","C7","C8","D1","D2","D3","D4","D5","D6","D7","D8","E1","E2","E3","E4","E5","E6","E7","E8","F1","F2","F3","F4","F5","F6","F7","F8","G1","G2","G3","G4","G5","G6","G7","G8","H1","H2","H3","H4","H5","H6","H7","H8"]
+#create all the chessboard squares as Tkinter buttons
 
-showCoords = 0
+squares = ["A1","A2","A3","A4","A5","A6","A7","A8","B1","B2","B3","B4","B5","B6","B7","B8","C1","C2","C3","C4","C5","C6","C7","C8","D1","D2","D3","D4","D5","D6","D7","D8","E1","E2","E3","E4","E5","E6","E7","E8","F1","F2","F3","F4","F5","F6","F7","F8","G1","G2","G3","G4","G5","G6","G7","G8","H1","H2","H3","H4","H5","H6","H7","H8"]
 
 A1 = Button(top, height = 5, width = 12, command = lambda: click("A1"), bg = "Olive Drab", anchor = "sw", text = "A1")
 A2 = Button(top, height = 5, width = 12, command = lambda: click("A2"), bg = "Light Yellow", anchor = "sw", text = "2")
@@ -119,10 +151,12 @@ Hlist = [H1,H2,H3,H4,H5,H6,H7,H8]
 columnlist = [Alist,Blist,Clist,Dlist,Elist,Flist,Glist,Hlist]
 alpha = ["A","B","C","D","E","F","G","H"]
 
+#place the buttons in a grid layout
 for i in range(8):
 	for j in range(8):
 		columnlist[i][j].grid(row=8-j,column=i)
 
+#configure the buttons for playing as white
 def whiteButtons():
 	global A1,A2,A3,A4,A5,A6,A7,A8,B1,B2,B3,B4,B5,B6,B7,B8,C1,C2,C3,C4,C5,C6,C7,C8,D1,D2,D3,D4,D5,D6,D7,D8,E1,E2,E3,E4,E5,E6,E7,E8,F1,F2,F3,F4,F5,F6,F7,F8,G1,G2,G3,G4,G5,G6,G7,G8,H1,H2,H3,H4,H5,H6,H7,H8
 	
@@ -144,6 +178,7 @@ def whiteButtons():
 		for j in range(8):
 			columnlist[i][j].grid(row=8-j,column=i)
 
+#configure the buttons for playing as black
 def blackButtons():
 	global A1,A2,A3,A4,A5,A6,A7,A8,B1,B2,B3,B4,B5,B6,B7,B8,C1,C2,C3,C4,C5,C6,C7,C8,D1,D2,D3,D4,D5,D6,D7,D8,E1,E2,E3,E4,E5,E6,E7,E8,F1,F2,F3,F4,F5,F6,F7,F8,G1,G2,G3,G4,G5,G6,G7,G8,H1,H2,H3,H4,H5,H6,H7,H8
 	
@@ -161,12 +196,9 @@ def blackButtons():
 		for i in range(7):
 			columnlist[i][7].configure(text = alpha[7-i])
 
-colour = 1
-time = 30.0
-
+#create a menu frame for the buttons along the top
 menuframe = Frame(top, width = 200, height = 1, bg = "gray70")
 menuframe.grid(row =0, column = 0, columnspan = 8, sticky = W)
-
 menuFont = tkFont.Font(family='Helvetica', size=10, weight = 'bold')
 
 startbutton = Button(menuframe, width = 14, height = 1, command = lambda: start(), text = "Start", font = 20, bg = "gray94")
@@ -175,6 +207,7 @@ lbbutton = Button(menuframe, width = 30, height = 1, command = lambda: showLB(),
 aboutbutton = Button(menuframe, width = 14, height = 1, command = lambda: showAbout(), text = "About", bg = "gray94")
 exitbutton = Button(menuframe, width = 12, height = 1, command = sys.exit, text = "Exit", bg = "gray94")
 
+#place them in a grid layout
 startbutton.grid(row=0, column=0)
 prefbutton.grid(row=0,column=2)
 lbbutton.grid(row=0,column=4)
@@ -183,11 +216,12 @@ exitbutton.grid(row=0,column=8)
 
 menuframe.grid_columnconfigure(7, minsize = 93)
 
-
+#add separators to make it look nicer
 for i in range(3):
 	separator = Frame(menuframe, height=25, width = 2, bd = 2, relief=SUNKEN, bg = "gray88").grid(row=0,column=2*i+1)
 separator = Frame(menuframe, height = 25, width = 90, bd = 2, relief=RAISED, bg = "gray94").grid(row=0,column=7)
 
+#create labels for the elements under the board
 aimbox = Label(top, width = 3, height = 1, bg = "White", text = "...")
 scorebox = Label(top, width = 5, height = 1, text = "0/0", bg = "White", anchor = "w")
 timebox = Label(top, width = 4, height = 1, text = "30.0", bg = "White", anchor = "w")
@@ -199,8 +233,7 @@ bestlabel = Label(top, width = 12, height = 1, text = "Session Best:", anchor = 
 timelabel = Label(top, width = 8, height = 1, text = "Time Left:", anchor = "e", bg = "Orange")
 newRecordLabel = Label(top , width = 11, height = 1, bg = "gray80")
 
-recordcolour = 0
-
+#when a new record is obtained, create a flashing "New Record!" label
 def newRecordChanger():
 	global recordcolour
 	if recordcolour == 1:
@@ -214,6 +247,7 @@ def newRecordChanger():
 	elif recordcolour == 0:
 		newRecordLabel.configure(bg = "gray80", text = "")
 
+#place the elements under the board in a grid layout
 aimbox.grid(row=11,column=3,rowspan=4,columnspan=2)
 scorebox.grid(row=11,column=1, sticky = "e", padx = 10)
 timebox.grid(row=11,column=7, sticky = "w")
@@ -228,6 +262,7 @@ top.grid_rowconfigure(9, minsize = 43)
 top.grid_rowconfigure(10, minsize = 1)
 top.grid_rowconfigure(15, minsize = 9)
 
+#set the fonts of the elements under the board
 bottomBoxFont = tkFont.Font(family='Helvetica', size=13)
 bottomLabelFont = tkFont.Font(family='Helvetica', size=13, weight = 'bold')
 
@@ -246,29 +281,28 @@ scorebox['font'] = bottomBoxFont
 timebox['font'] = bottomBoxFont
 bestbox['font'] = bottomBoxFont
 
+#creates a leaderboards window
 def showLB():
 	global LBWindow
+	
+	#try and except is used to check if the leaderboard window is already open
 	try:
 		LBWindow.winfo_exists()
 	except:
 		LBWindow = Tk()
+		LBWindow.geometry("%dx%d+%d+%d" % ((275, 107) + (top.winfo_x() + 378 - 138, top.winfo_y() + 65)))
 		LBWindow.wm_title("Leaderboards")
 		LBWindow.resizable(width=FALSE, height=FALSE)
-		LBWindow.wm_iconbitmap(iconsStr + "\leaderboards.ico")
+		LBWindow.wm_iconbitmap(iconsStr + "\leaderboards.ico") 
 		LBWindow.configure(bg = "gray95")
 		
-		recordsLabel = Label(LBWindow, width = 38, height = 1, text = "Records:", bg = "Orange")
+		recordsLabel = Label(LBWindow, width = 38, height = 1, text = "All-time Bests:", bg = "Orange")
 		time10HeaderLabel = Label(LBWindow, width = 12, height = 1, text = "10 Seconds", bg = "Orange")
 		time30HeaderLabel = Label(LBWindow, width = 12, height = 1, text = "30 Seconds", bg = "Orange")
 		time60HeaderLabel = Label(LBWindow, width = 12, height = 1, text = "60 Seconds", bg = "Orange")
 		time10ScoreLabel = Label(LBWindow, width = 12, height = 1, text = "%d" %(lbValues[0]))
 		time30ScoreLabel = Label(LBWindow, width = 12, height = 1, text = "%d" %(lbValues[1]))
 		time60ScoreLabel = Label(LBWindow, width = 12, height = 1, text = "%d" %(lbValues[2]))
-	
-		def close():
-			LBWindow.destroy()
-	
-		closeButton = Button(LBWindow, width = 11, height = 1, text = "Close", command = lambda: close())
 		
 		horSeparator = Frame(LBWindow, width = 274, height = 2, relief = FLAT, bd = 4, bg = "Black").grid(row=1,column=0,columnspan=5)
 		verSeparator = Frame(LBWindow, width = 2, height = 56, relief = FLAT, bd = 1, bg = "Black").grid(row=2,column=1,rowspan=3)
@@ -283,24 +317,28 @@ def showLB():
 		time10ScoreLabel.grid(row=4,column=0, ipady = 3)
 		time30ScoreLabel.grid(row=4,column=2, ipady = 3)
 		time60ScoreLabel.grid(row=4,column=4, ipady = 3)
-	
+		
+		def close(): #using quit() would exit the entire program
+			LBWindow.destroy()
+		
+		closeButton = Button(LBWindow, width = 11, height = 1, text = "Close", command = lambda: close())
+		
 		closeButton.grid(row=6,column=4, padx = 2, sticky = "e")
-	
 
-nextColour = ""
-
+#creates a window that displays 'about' information
 def showAbout():
 	global aboutWindow
 	try:
 		aboutWindow.winfo_exists()
 	except:
 		aboutWindow = Tk()
+		aboutWindow.geometry("%dx%d+%d+%d" % ((482, 270) + (top.winfo_x() + 378 - 241, top.winfo_y() + 65)))
 		aboutWindow.resizable(width=FALSE, height=FALSE)
 		aboutWindow.configure(bg = "gray96")
 		aboutWindow.wm_title("About")
 		aboutWindow.wm_iconbitmap(iconsStr + "\\about.ico")
 		
-		def close():
+		def close(): #using quit() would exit the entire program
 			aboutWindow.destroy()
 		
 		closeButton = Button(aboutWindow, width = 10, height = 1, text = "Close", command = lambda: close(), bg = "Gray")
@@ -309,6 +347,7 @@ def showAbout():
 		
 		colourList = ["light blue","brown","yellow","light green","orange","turquoise","pink", "rosy brown", "gold", "cyan", "PeachPuff2", "PaleGreen1", "RosyBrown1", "orchid1", "wheat", "lavender", "mint cream", "honeydew", "light cyan", "gainsboro", "LightGoldenrod2", "yellow3", "LightSteelBlue2"]
 		
+		#set the window background to a random colour from colourList
 		def colourChanger():
 			global aboutWindow
 			global nextColour
@@ -317,12 +356,11 @@ def showAbout():
 				nextColour = random.choice(colourList)
 				
 			aboutWindow.configure(bg = nextColour)
-			print nextColour
-			aboutWindow.after(500, colourChanger)
+			aboutWindow.after(720, colourChanger)
 		
 		colourChanger()
-		aboutText.config(font=("Helvetica", 12))
 		
+		aboutText.config(font=("Helvetica", 12))
 		aboutText.grid(row=1,column=1, columnspan = 2)
 		
 		closeButton.grid(row=2,column=1, sticky = "e")
@@ -331,6 +369,7 @@ def showAbout():
 		aboutWindow.grid_rowconfigure(0, minsize = 22)
 		aboutWindow.grid_rowconfigure(2, minsize = 22)
 
+#creates an options window
 def showoptions():
 	global prefWindow
 	global stopTimer
@@ -338,6 +377,7 @@ def showoptions():
 		prefWindow.winfo_exists()
 	except:
 		prefWindow = Tk()
+		prefWindow.geometry("%dx%d+%d+%d" % ((205, 266) + (top.winfo_x() + 378 - 103, top.winfo_y() + 65)))
 		prefWindow.configure(bg = "gray96")
 		prefWindow.wm_title("Preferences")
 		prefWindow.resizable(width=FALSE, height=FALSE)
@@ -390,13 +430,15 @@ def showoptions():
 			time30.configure(bg = "gray95")
 			time60.configure(bg = "gray76")
 			time = 60.0
-	
+
+		#show coordinates
 		def changeToCoords():
 			global showCoords
 			showCoordsButton.configure(bg = "gray76")
 			dontshowCoordsButton.configure(bg = "gray95")
 			showCoords = 1
 
+		#don't show coordinates
 		def changeToNoCoords():
 			global showCoords
 			showCoordsButton.configure(bg = "gray95")
@@ -413,10 +455,7 @@ def showoptions():
 		dontshowCoordsButton = Button(prefWindow, text = "No", width = 11, height = 1, command = lambda: changeToNoCoords(), bg = "gray95")
 		applyButton = Button(prefWindow, text = "Apply", width = 11, height = 1, command = lambda: applyPref(), bg = "gray95")
 		
-		
-		
 		optionLabelFont = tkFont.Font(family='Helvetica', size=19, weight = 'bold')
-		#colourChosen['font'] = optionLabelFont
 		
 		outerHorSeparator = Frame(prefWindow, width = 205, height = 4, relief = FLAT, bd = 1, bg = "gray95").grid(row=13,column=0,columnspan=4)
 		innerHorSeparator = Frame(prefWindow, width = 200, height = 4, relief = GROOVE, bd = 1, bg = "gray95").grid(row=4,column=1,columnspan=2)
@@ -453,6 +492,7 @@ def showoptions():
 		if showCoords == 1:
 			changeToCoords()
 
+#applies the preferences selected in the options menu
 def applyPref():
 	global prefWindow
 	if colour == 1:
@@ -464,37 +504,34 @@ def applyPref():
 		colourlabel.configure(fg = "White", bg = "Black", text = "Black")
 		aimbox.configure(fg = "White", bg = "Black")
 	else:
+		#choose randomly between black and white, white = 1, black = 2
 		colours = [1,2]
+		
 		if random.choice(colours) == 1:
 			whiteButtons()
 			colourlabel.configure(fg = "Black", bg = "White", text = "White")
 			aimbox.configure(fg = "Black", bg = "White")
+		
 		else:
 			blackButtons()
 			colourlabel.configure(fg = "White", bg = "Black", text = "Black")
 			aimbox.configure(fg = "White", bg = "Black")
+		
 		timebox.configure(text = time)
+	
 	if time == 10.0:
 		bestbox.configure(text = sessionbest10)
 	if time == 30.0:
 		bestbox.configure(text = sessionbest30)
 	if time == 60.0:
 		bestbox.configure(text = sessionbest60)
+	
 	timebox.configure(text = time)
 	aimbox.configure(text = "...")
+	#close the options window
 	prefWindow.destroy()
 
-total = 0
-score = 0
-chosensquare = 0
-begun = 0
-k = 0
-sessionbest10 = 0
-sessionbest30 = 0
-sessionbest60 = 0
-newrecordtimer = 0
-gameOver = 1
-
+#check if the score is a session best or new record
 def scorechecker(score):
 	global sessionbest10, sessionbest30, sessionbest60, newrecordtimer
 	global recordcolour
@@ -529,8 +566,7 @@ def scorechecker(score):
 			lbFile = open(lbFileStr + "\data.txt", 'w')
 			lbFile.write("%d\n%d\n%d" %(lbValues[0],lbValues[1],lbValues[2]))
 
-stopTimer = 0
-
+#start the clock
 def timeupdater():
 	global k
 	global gameOver
@@ -548,6 +584,7 @@ def timeupdater():
 			gameOver = 1
 			aimbox.configure(text = "...")
 
+#increment the score (called when correct square clicked)
 def scoreupdater(score):
 	global total
 	total += 1
@@ -574,6 +611,7 @@ def countdownTimer0():
 	stopTimer = 0
 	aimbox.configure(text = randomsquarereturner())
 
+#start the game
 def start():
     global stopTimer
     global k
@@ -605,11 +643,13 @@ def start():
     k = 0
     countdownTimer3()
 
+#return a random square
 def randomsquarereturner():
     global chosensquare
     chosensquare = (random.choice(squares))
     return chosensquare
 
+#called when a square is clicked
 def click(square):
     global score
     global chosensquare
@@ -635,5 +675,6 @@ def click(square):
                 colourlabel.configure(fg = "White", bg = "Black", text = "Black")
                 aimbox.configure(fg = "White", bg = "Black")
 
+#loops the window so it doesn;t immediately disappear
 top.mainloop()
 
