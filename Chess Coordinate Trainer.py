@@ -1,20 +1,33 @@
-from Tkinter import *
-import tkFont 
+try:
+        from Tkinter import *
+except ImportError:
+        from tkinter import *
+
+try:
+        import tkFont
+except ImportError:
+        import tkinter.font as tkFont
 
 import random
 
 import os 
-from pathlib import Path
+from pathlib import Path, PurePath
 
-#find leaderboard file path
-lbFileStr = ("%s\Data" %os.getcwd()) 
-lbFilePath = Path(lbFileStr)
+global BASE_PATH
+BASE_PATH = Path(__file__).parents[0]
 
-if not os.path.exists(lbFileStr):
-	os.makedirs(lbFileStr)
+dataPath = Path(PurePath(BASE_PATH, 'Data'))
+lbFilePath = PurePath(dataPath, 'data.txt')
+
+if not dataPath.exists():
+	os.makedirs(dataPath)
 
 #find icon path
-iconsStr = ("%s\Icons" %os.getcwd())
+iconPath = Path(PurePath(BASE_PATH, 'Icons'))
+windowIconPath = Path(PurePath(iconPath, 'CCT.ico'))
+aboutIconPath = Path(PurePath(iconPath, 'about.ico'))
+lbIconPath = Path(PurePath(iconPath, 'leaderboards.ico'))
+gearsIconPath = Path(PurePath(iconPath, 'gears.ico'))
 
 #initialise various variables used
 lbValues = []
@@ -35,21 +48,26 @@ gameOver = 1
 nextColour = ""
 stopTimer = 0
 
+def generateLeaderboard(lbFilePath):
+	lbFile = open(lbFilePath, 'w+')
+	for i in range(3):
+		lbValues.append(0)
+	lbFile.write('0\n0\n0')    
+
 #read leaderboard file
-if Path(lbFileStr + "\data.txt").is_file(): #if 
-	lbFile = open(os.path.join(lbFileStr, "data.txt"), 'r')
-	with open(os.path.join(lbFileStr, "data.txt"), 'r') as f:
-		lbValues = f.read().splitlines()
-		lbValues[0] = eval(lbValues[0])
-		lbValues[1] = eval(lbValues[1])
-		lbValues[2] = eval(lbValues[2])
+if Path(lbFilePath).is_file(): #if
+        try:
+                with open(lbFilePath, 'r') as f:
+                        lbValues = f.read().splitlines()
+                        lbValues[0] = eval(lbValues[0])
+                        lbValues[1] = eval(lbValues[1])
+                        lbValues[2] = eval(lbValues[2])
+        except:
+                generateLeaderboard(lbFilePath)
 
 #create leaderboard file if it doesn't already exist
 else: 
-	lbFile = open(lbFileStr + "\data.txt", 'w+')
-	for i in range(3):
-		lbValues.append(0)
-	lbFile.write('0\n0\n0')
+        generateLeaderboard(lbFilePath)  
 
 #initialise a parent window called top
 top = Tk()
@@ -60,7 +78,7 @@ screenHeight = top.winfo_screenheight()
 top.configure(bg = "gray80")
 top.wm_title("Chess Coordinate Trainer")
 top.resizable(width=FALSE, height=FALSE)
-top.wm_iconbitmap(iconsStr, "\CCT.ico")
+top.wm_iconbitmap(windowIconPath)
 
 #centre top window
 top.geometry("%dx%d+%d+%d" % ((755, 848) + ((screenWidth / 2.0) - 378, (screenHeight / 2.0) - 424)))
@@ -293,7 +311,7 @@ def showLB():
 		LBWindow.geometry("%dx%d+%d+%d" % ((275, 107) + (top.winfo_x() + 378 - 138, top.winfo_y() + 65)))
 		LBWindow.wm_title("Leaderboards")
 		LBWindow.resizable(width=FALSE, height=FALSE)
-		LBWindow.wm_iconbitmap(iconsStr + "\leaderboards.ico") 
+		LBWindow.wm_iconbitmap(lbIconPath) 
 		LBWindow.configure(bg = "gray95")
 		
 		recordsLabel = Label(LBWindow, width = 38, height = 1, text = "All-time Bests:", bg = "Orange")
@@ -336,7 +354,7 @@ def showAbout():
 		aboutWindow.resizable(width=FALSE, height=FALSE)
 		aboutWindow.configure(bg = "gray96")
 		aboutWindow.wm_title("About")
-		aboutWindow.wm_iconbitmap(iconsStr + "\\about.ico")
+		aboutWindow.wm_iconbitmap(aboutIconPath)
 		
 		def close(): #using quit() would exit the entire program
 			aboutWindow.destroy()
@@ -381,7 +399,7 @@ def showoptions():
 		prefWindow.configure(bg = "gray96")
 		prefWindow.wm_title("Preferences")
 		prefWindow.resizable(width=FALSE, height=FALSE)
-		prefWindow.wm_iconbitmap(iconsStr + "\gears.ico")
+		prefWindow.wm_iconbitmap(gearsIconPath)
 		
 		stopTimer = 1
 		
@@ -543,7 +561,7 @@ def scorechecker(score):
 			recordcolour = 1
 			newRecordChanger()
 			lbValues[0] = sessionbest10
-			lbFile = open(lbFileStr + "\data.txt", 'w')
+			lbFile = open(lbFilePath, 'w')
 			lbFile.write("%d\n%d\n%d" %(lbValues[0],lbValues[1],lbValues[2]))
 	if score > sessionbest30 and time == 30.0:
 		newrecordtimer = 1
@@ -553,7 +571,7 @@ def scorechecker(score):
 			recordcolour = 1
 			newRecordChanger()
 			lbValues[1] = sessionbest30
-			lbFile = open(lbFileStr + "\data.txt", 'w')
+			lbFile = open(lbFilePath, 'w')
 			lbFile.write("%d\n%d\n%d" %(lbValues[0],lbValues[1],lbValues[2]))
 	if score > sessionbest60 and time == 60.0:
 		newrecordtimer = 1
@@ -563,7 +581,7 @@ def scorechecker(score):
 			recordcolour = 1
 			newRecordChanger()
 			lbValues[2] = sessionbest60
-			lbFile = open(lbFileStr + "\data.txt", 'w')
+			lbFile = open(lbFilePath, 'w')
 			lbFile.write("%d\n%d\n%d" %(lbValues[0],lbValues[1],lbValues[2]))
 
 #start the clock
