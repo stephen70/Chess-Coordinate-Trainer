@@ -6,4 +6,4 @@ Features:
 - Choose a timer of 10, 30 or 60 seconds
 - Play as white, black, or a random choice of either
 - Record high-scores
-- Toggle displaying coordinates on squares
+- Toggle display of coordinates on squares
