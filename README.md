@@ -7,3 +7,7 @@ Features:
 - Play as white, black, or a random choice of either
 - Record high-scores
 - Toggle display of coordinates on squares
+
+Instructions:
+
+- Download and extract, then run chess_coordinate_trainer.py.
